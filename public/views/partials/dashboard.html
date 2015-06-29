@@ -1,0 +1,52 @@
+
+        <div class="col-lg-12">
+            <input ng-model="q" id="search" class="form-control" placeholder="Filter device">
+            <hr>
+        </div>
+        <div class="row" >
+            <div class="col-lg-6" dir-paginate="device in deviceList | orderBy: ['viewOptions.sortOrder', '-date'] | filter: q | itemsPerPage: 12" pagination-id="eventDeviceList">
+
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h4>
+                            <i ng-hide="device.ui.icon" class="fa {{iconMap[device.deviceType]}}"></i>
+                            <img ng-show="device.ui.icon" ng-src={{device.ui.icon}}>
+                            <a href="" editable-text="device.deviceName" onbeforesave="updateDevice(device._id,'deviceName',$data)">{{device.deviceName| limitTo: 35}}{{device.deviceName.length > 35 ? '...' : ''}}</a>
+                            <div class="ibox-tools">
+                                <span ng-if="device.ui.controls === 'camera'">
+                                  <a type="button" ng-click="captureSnapshot(device)"><span class="fa fa-cloud-upload fa-lg" title="Save Snapshot"></span></a>
+                                </span>
+
+                                <span ng-if="device.ui.controls === 'sensor'">
+                                  <a ng-show="currentUser.isAdmin" type="button" ng-click="device.forceShowPlot=!device.forceShowPlot"><span class="fa fa-toggle-on fa-lg" title="Show Plot"></span></a>
+                                  <a type="button" ng-click="openUploadModal(device)"><span class="fa fa-cloud-upload fa-lg" title="Save Data"></span></a>
+                                </span>
+                                <a type="button" ng-click="openAlertModal(device)"><span class="fa fa-exclamation-triangle fa-lg" title="Alerts"></span></a>
+                                <a type="button" ng-click="openSettingsModal(device)"><span class="fa fa-cog fa-lg" title="Device Settings"></span></a>
+                                <a ng-show="device.isOnline" style="color:#428BCA">online</a>
+                                <a ng-hide="device.isOnline" style="color:red">offline</a>
+                            </div>
+                        </h4>
+                    </div>
+                    <div class="ibox-content adaptor-box">
+                        <div ng-attr-id="{{ 'device-alert-' + device._id }}" style="position: absolute; top: 70px; left: 40px; right: 40px; z-index: 100;"></div>
+                        <div ng-if="device.ui.partial">
+                            <ng-include src="'/views/devicePartials/'+ device.ui.partial +'.html?time=' + device.randomNum"></ng-include>
+                        </div>
+                        <div ng-hide="device.ui.partial">
+                            <ng-include src="'/views/devicePartials/default.html'"></ng-include>
+                        </div>
+                        <!--
+                        <hr>
+                        <div class="pull-left">
+                            <label>Annotation:</label>
+                            <a href="" editable-text="device.annotation" e-style="color: blue" >{{device.annotation || '(Click to add)'}}</a>
+
+                        </div>
+                        <div class="clearfix"></div>
+                        -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <dir-pagination-controls boundary-links="true" pagination-id="eventDeviceList" template-url="/javascripts/bower_components/angular-utils-pagination/dirPagination.tpl.html"></dir-pagination-controls>

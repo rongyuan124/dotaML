@@ -1,0 +1,36 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Report Manager</h2>
+        <h4>Create and edit data reports</h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h5>Create New Report</h5>
+                <div class="ibox-tools">
+
+                </div>
+            </div>
+            <div class="ibox-content">
+                <report-panel is-new="true" available-users="availableUsers" available-devices="availableDevices"></report-panel>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row" ng-repeat="report in reports">
+    <div class="col-lg-12">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+                <h5>{{report.name}}</h5>
+                <div class="ibox-tools">
+
+                </div>
+            </div>
+            <div class="ibox-content">
+                <report-panel is-new="false" available-users="availableUsers" available-devices="availableDevices"></report-panel>
+            </div>
+        </div>
+    </div>
+</div>

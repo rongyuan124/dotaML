@@ -1,0 +1,38 @@
+<form>
+    <label class="radio-inline">
+        <input type="radio" ng-model="reportType" value="sensorData" ng-disabled="!isNew"> Sensor data report
+    </label>
+    <label class="radio-inline">
+        <input type="radio" ng-model="reportType" value="event" ng-disabled="!isNew"> Event report
+    </label>
+    <hr>
+    <div class="form-group" ng-if="isNew">
+        <label>Report name</label>
+        <input type="text" class="form-control" placeholder="Enter a name for this report">
+    </div>
+    <div class="form-group">
+        <label>Devices:</label>
+        <ui-select multiple ng-model="report.devices" theme="bootstrap">
+            <ui-select-match placeholder="Select devices...">{{$item}}</ui-select-match>
+            <ui-select-choices repeat="device in availableDevices | filter:$select.search">
+                {{device}}
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div class="form-group">
+        <label>Users:</label>
+        <ui-select multiple ng-model="report.users" theme="bootstrap">
+            <ui-select-match placeholder="Select users...">{{$item}}</ui-select-match>
+            <ui-select-choices repeat="user in availableUsers | filter:$select.search">
+                {{user}}
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div class="form-group">
+        <label>Span (days)</label>
+        <input type="number" class="form-control" placeholder="How many days of data should each report contain?" min="1">
+    </div>
+    <button ng-if="isNew" type="submit" class="btn btn-primary">Create</button>
+    <button ng-if="!isNew" type="submit" class="btn btn-info">Update</button>
+    <button ng-if="!isNew" type="submit" class="btn btn-danger pull-right">Delete</button>
+</form>

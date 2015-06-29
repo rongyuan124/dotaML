@@ -1,0 +1,42 @@
+<div ng-controller="TSAdaptorController" ng-init="setPlateTarget.temp=0;setStirrerSpeed.speed=0">
+    <div class="row">
+        <div class="text-center"><h3>{{ display.result.plateTemp || display.result.probeTemp || 'No Data' }} <span ng-if="display.result.plateTemp || display.result.probeTemp">&#x2103;</span></h3></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3 col-xs-6">
+            <div class="text-center ts-control-box">
+                <h5>Temp. (&#x2103;)</h5>
+                <button class="btn btn-info btn-rounded" ng-click="buttonClick('getProbeTemp')">Get Probe</button>
+                <br>
+                <button class="btn btn-info btn-rounded" ng-click="buttonClick('getPlateTemp')">Get Plate</button>
+            </div>
+        </div>
+        <div class="col-sm-3 col-xs-6">
+            <div class="text-center ts-control-box">
+                <h5>Plate Temp. (&#x2103;)</h5>
+                <knob knob-data="setPlateTarget.temp" knob-options="{min:0, max:450}" data-fgColor="#1AB394" data-width="80" data-height="80"></knob>
+                <div style="margin-top:5px;">
+                    <button class="btn btn-sm btn-info btn-rounded" ng-click="buttonClick('setPlateTarget')">Set</button>
+                    <button class="btn btn-sm btn-warning btn-rounded" ng-click="buttonClick('setHeaterOff')">Off</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3 col-xs-6">
+            <div class="text-center ts-control-box">
+                <h5>Stirrer Speed (rpm)</h5>
+                <knob knob-data="setStirrerSpeed.speed" knob-options="{min:0, max:1500}" data-fgColor="#1AB394" data-width="80" data-height="80"></knob>
+                <div style="margin-top:5px;">
+                    <button class="btn btn-sm btn-info btn-rounded" ng-click="buttonClick('setStirrerSpeed')">Set</button>
+                    <button class="btn btn-sm btn-warning btn-rounded" ng-click="buttonClick('setStirrerOff')">Off</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-3 col-xs-6">
+            <div class="text-center ts-control-box">
+                <div ng-controller="TSSensorController">
+                    <div class="flot-chart graph-container" style="height:150px;width:100%;margin-bottom:15px;"><flot dataset="device.sensorData" options="options" width="100%" height="100%" hideXAxisLable></flot></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

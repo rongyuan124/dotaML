@@ -1,0 +1,16 @@
+<div class="form-inline" ng-controller="driverSelectionController">
+    <!-- TODO: only show this if there are more than one driver possible? -->
+    <h4><i class="glyphicon glyphicon-refresh"></i> Instrument Model Selection </h4>
+
+    <form ng-submit="updateDriver()">
+            <div class="form-group">
+                <label>Instrument model</label>
+                <select class="form-control" ng-model="newDriverId"> 
+                  <option ng-repeat="driver in driverList | filter:{deviceType: device.deviceType}">{{driver.driverId}}</option>
+                </select>
+            </div>
+
+            <input type="submit" class="btn btn-primary" value="Choose"></input>
+
+    </form>
+</div>

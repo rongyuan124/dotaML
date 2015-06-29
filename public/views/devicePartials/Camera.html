@@ -1,0 +1,12 @@
+<!-- TODO: lots of work -->
+<div ng-controller="TSAdaptorController" ng-init="">
+  <h5 class="text-center">Last updated: {{device.params.lastUpdated | date:'medium'}}</h5>
+  <div class="center-block" style="border:1px solid #ccc;padding:5px;width: 250px ;height:190px">
+    <div id="camera-image">
+      <!--fallback-src="images/noSnapshot.png" -->
+      <img id="imageholder" class="center-block" ng-src="{{device.params.bucketUrl + device.params.snapshotImageFileName}}" fallback-src="images/noSnapshot.png" width="240" height="180"></img>
+      <!--gif -->
+      <!--<img id="image" src="/img/camera.gif" width="240" height="180"></img>-->
+      </div>
+  </div>
+</div>

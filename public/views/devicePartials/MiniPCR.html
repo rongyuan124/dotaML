@@ -1,0 +1,46 @@
+<div ng-controller="TSAdaptorController" ng-init="display.result={}">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12 text-center">
+          {{version}}
+        </div>
+    </div>
+    <br />
+    <div class="row">
+      <div class="col-sm-6 col-xs-6">
+        <!-- code to display the program currently loaded on the MiniPCR
+        <div class="row">
+          <div class="col-sm-12 col-xs-12 text-center">
+            {{display.result.program}}
+            <button class="btn btn-primary btn-sm" ng-click="buttonClick('getProgram')">Update</button>
+          </div>
+        </div>
+        -->
+        <div class="row">
+          <div class="col-sm-12 col-xs-12 text-center">
+            <h5>Select Program</h5>
+            <select class="form-control" ng-init="setProgram.program={'protocolName':'','lidTemp':37,'steps':[{'stepName':'','target':37,'time':1,'type':1},{'stepName':'','target':37,'time':600,'type':3}]}" ng-model="setProgram.program">
+                <option value='{"protocolName":"","lidTemp":37,"steps":[{"stepName":"","target":37,"time":1,"type":1},{"stepName":"","target":37,"time":600,"type":3}]}'>10 min 37&#x2103; Heating Block</option>
+                <option value='{"protocolName":"","lidTemp":42,"steps":[{"stepName":"","target":42,"time":1,"type":1},{"stepName":"","target":42,"time":600,"type":3}]}'>10 min 42&#x2103; Heating Block</option>
+                <option value='{"protocolName":"","lidTemp":55,"steps":[{"stepName":"","target":55,"time":1,"type":1},{"stepName":"","target":55,"time":600,"type":3}]}'>10 min 55&#x2103; Heating Block</option>
+                <option value='{"protocolName":"PCR Protocol","lidTemp":105,"steps":[{"stepName":"","target":94,"time":300,"type":1},{"stepName":"","target":94,"time":30,"type":1},{"stepName":"","target":60,"time":30,"type":1},{"stepName":"","target":72,"time":30,"type":1},{"stepName":"","target":2,"time":30,"type":2},{"stepName":"","target":72,"time":30,"type":1},{"stepName":"","target":20,"time":30,"type":1}]}'>PCR Protocol</option>
+            </select>
+          </div>
+        </div>
+        <br />
+        <div class="row">
+          <div class="col-sm-12 col-xs-12 text-center">
+              <button class="btn btn-primary" ng-click="buttonClick('setProgram')">Start</button>
+              <button class="btn btn-warning" ng-click="buttonClick('stop')">Stop</button>
+              <button class="btn btn-info" ng-click="buttonClick('getStatus')">Poll</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xs-6">
+        <div class="text-center ts-control-box">
+          <div ng-controller="TSSensorController">
+              <div class="flot-chart graph-container" style="height:150px;width:100%;margin-bottom:15px;"><flot dataset="device.sensorData" options="options" width="100%" height="100%" hideXAxisLable></flot></div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>

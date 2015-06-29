@@ -1,0 +1,55 @@
+<nav class="navbar-default navbar-static-side" role="navigation" ng-controller="SideNavController">
+    <div class="sidebar-collapse">
+        <ul class="nav" id="side-menu">
+            <li class="nav-header">
+                <div class="dropdown profile-element"> <span>
+                <div><img src="/images/logo_white.png" width="180"></div>
+                    <br>
+                            <img alt="image" width="60" height="60" class="img-circle" ng-src="images/{{currentUser.profilePic}}" />
+                             </span>
+                    <a data-toggle="dropdown" class="dropdown-toggle">
+                            <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">{{currentUser.firstName}} {{currentUser.lastName}}</strong>
+                             </span> <span class="text-muted text-xs block">Settings <b class="caret"></b></span> </span> </a>
+                    <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                        <li><a href="#/myprofile">My Profile</a></li>
+                        <li><a href="#/contactus">Contact Us</a></li>
+
+                        <li class="divider"></li>
+                        <li><a href="/signout">Logout</a></li>
+                    </ul>
+                </div>
+                <div class="logo-element">
+                    <a data-toggle="dropdown" class="dropdown-toggle"><img alt="image" width="48" height="48" class="img-circle" ng-src="images/{{currentUser.profilePic}}" /></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#/myprofile">My Profile</a></li>
+                        <li><a href="#/contactus">Contact Us</a></li>
+
+                        <li class="divider"></li>
+                        <li><a href="/signout">Logout</a></li>
+                    </ul>
+                </div>
+            </li>
+
+
+
+            <li>
+                <a href="#/dashboard"><i class="fa fa-th-large"></i> <span class="nav-label">Dashboard</span> </a>
+            </li>
+            <li>
+                <a href="#/data"><i class="fa fa-book"></i> <span class="nav-label">Journal</span> </span></a>
+            </li>
+            <li ng-if="currentUser.isAdmin">
+                <a href="#/register"><i class="fa fa-plus-square-o"></i> <span class="nav-label"> Register Device </span> </a>
+            </li>
+            <li ng-if="!currentUser.isAdmin">
+                <a href="#/activate"><i class="fa fa-plus-square-o"></i> <span class="nav-label"> Add a device</span> </a>
+            </li>
+            <li>
+                <a href="#/documentation"><i class="fa fa-question-circle"></i> <span class="nav-label"> Documentation</span> </a>
+            </li>
+
+
+        </ul>
+
+    </div>
+</nav>

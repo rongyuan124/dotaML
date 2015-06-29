@@ -1,0 +1,60 @@
+<div ng-controller="TSAdaptorController" ng-init="setRate.rate = 10">
+    <div class="row">
+        <div class="col-sm-3 col-xs-6">
+            <div class="text-center ts-control-box">
+                <h5>Flow rate</h5>
+                <br>
+                <knob knob-data="setRate.rate" data-fgColor="#1AB394" data-width="85" data-height="85"></knob>
+            </div>
+        </div>
+
+        <div class="clearfix visible-xs-block"><br></div>
+        <div class="col-sm-3 col-xs-6">
+            <div class="text-center ts-control-box">
+                <h5>Volume</h5>
+                <input type="text" class="form-control" placeholder="Size/Type" ng-model="setRate.rate">
+                <br>
+                <select class="form-control" ng-init="setRate.unit = 'ml/hr'" ng-model="setRate.unit">
+                    <option value="pl/min">pL/min</option>
+                    <option value="nl/min">nL/min</option>
+                    <option value="ul/min">&micro;L/min</option>
+                    <option value="ml/min">mL/min</option>
+                    <option value="pl/hr">pL/hr</option>
+                    <option value="pl/hr">nL/hr</option>
+                    <option value="ul/hr">&micro;L/hr</option>
+                    <option value="ml/hr">mL/hr</option>
+                </select>
+                <br>
+                <button class="btn btn-info btn-rounded" ng-click="buttonClick('setRate')">Set</button>
+            </div>
+        </div>
+        <div class="col-sm-3 col-xs-6">
+            <div class="text-center ts-control-box">
+                <h5>Syringe</h5>
+                <select class="form-control" ng-init="setDiameter.diameter = 1" ng-model="setDiameter.diameter">
+                    <option value="0.1">0.1 mm</option>
+                    <option value="0.5">0.5 mm</option>
+                    <option value="1">1 mm</option>
+                    <option value="2">2 mm</option>
+                    <option value="5">5 mm</option>
+                    <option value="10">10 mm</option>
+                    <option value="12">12 mm</option>
+                    <option value="16">16 mm</option>
+                </select>
+                <br>
+                <br>
+                <br>
+                <br>
+                <button class="btn btn-info btn-rounded" ng-click="buttonClick('setDiameter')">Set</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6 col-xs-6 text-center">
+            <button class="btn btn-primary btn" ng-click="buttonClick('run')">Start</button>
+        </div>
+        <div class="col-sm-6 col-xs-6 text-center">
+            <button class="btn btn-warning btn" ng-click="buttonClick('stop')">Stop</button>
+        </div>
+    </div>
+</div>

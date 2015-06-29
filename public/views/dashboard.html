@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html ng-app="DotaMLAPP">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Dota Prediction</title>
+
+  <link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="/font-awesome/css/font-awesome.css">
+  <link rel="stylesheet" type="text/css" href="/css/animate.css">
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+<!--
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico">
+  <link rel="apple-touch-icon" href="/images/favicon.ico">-->
+
+</head>
+
+<body ng-controller="Dashboard as ctrl">
+<form ng-submit="ctrl.getMatchInfo(ctrl.matchId)" name="">
+  <div class="form-group">
+    <label for="matchId"> Match </label>
+    <input id="matchId"
+           class="form-control"
+           type="number"
+           placeholder="{{ctrl.matchId}}"
+           ng-model="ctrl.matchId"
+           required>
+    <input class="btn btn-primary"
+           type="submit"
+           value="Get Match Information">
+    <span>{{ctrl.heroIdList}}</span>
+  </div>
+</form>
+
+
+<!-- Mainly scripts -->
+<script src="/javascripts/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="/javascripts/bower_components/jquery-ui/jquery-ui.min.js"></script>
+<script src="/javascripts/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/javascripts/bower_components/angular/angular.min.js"></script>
+<script type="text/javascript" src="/javascripts/bower_components/angular-route/angular-route.min.js"></script>
+<script type="text/javascript" src="/javascripts/bower_components/angular-sanitize/angular-sanitize.js"></script>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="/javascripts/bower_components/angular-socket-io/socket.min.js"></script>
+
+<!-- our own ng scripts -->
+<script type="text/javascript" src="/javascripts/angularDotaML.js"></script>
+
+</body>
+</html>
+
