@@ -61,7 +61,7 @@ var SpManager = (function(){
     var key = '7994766109F00F8528BF6668AA0120C1'
     return {
         getMatch: function (matchId,cb) {
-            superagent.get('https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id=27110133&key=7994766109F00F8528BF6668AA0120C1')
+            superagent.get('https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id='+ matchId+ '&key=7994766109F00F8528BF6668AA0120C1')
                 .end(cb);
         }
     }
