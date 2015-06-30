@@ -3,14 +3,14 @@
 
 <head>
 
-  <meta charset="utf-8">
+  <meta charset="utf-8"><!--
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-->
+  <title>In the Bag</title>
 
-  <title>Dota Prediction</title>
-
-  <link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="/css/bootstrap.css"><!--
   <link rel="stylesheet" type="text/css" href="/font-awesome/css/font-awesome.css">
-  <link rel="stylesheet" type="text/css" href="/css/animate.css">
+  <link rel="stylesheet" type="text/css" href="/css/animate.css">-->
   <link rel="stylesheet" type="text/css" href="/css/style.css">
 <!--
   <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico">
@@ -19,21 +19,40 @@
 </head>
 
 <body ng-controller="Dashboard as ctrl">
-<form ng-submit="ctrl.getMatchInfo(ctrl.matchId)" name="">
-  <div class="form-group">
-    <label for="matchId"> Match </label>
-    <input id="matchId"
-           class="form-control"
-           type="number"
-           placeholder="{{ctrl.matchId}}"
-           ng-model="ctrl.matchId"
-           required>
-    <input class="btn btn-primary"
-           type="submit"
-           value="Get Match Information">
-    <span>{{ctrl.heroIdList}}</span>
-  </div>
-</form>
+
+    <h2>In The Bag</h2>
+    <div class="form-inline">
+        <form ng-submit="ctrl.addMatchInfo(ctrl.matchId)" >
+          <div class="form-group">
+            <label for="matchId"> Match </label>
+            <input id="matchId"
+                   class="form-control"
+                   type="number"
+                   placeholder="{{ctrl.matchId}}"
+                   ng-model="ctrl.matchId"
+                   required>
+            <input class="btn btn-primary"
+                   type="submit"
+                   value="Get Match Information">
+
+          </div>
+        </form>
+    </div>
+    <br>
+    <div ng-repeat="match in ctrl.matches">
+        <label>Match Id</label>
+        <span>{{match.matchId}}</span>
+          <span ng-if="!match.error">
+                <label>Hero List</label>
+                <span>{{match.heroIdList}}</span>
+                <label>Match Prediction</label>
+                <span>{{match.prediction}}</span>
+          </span>
+          <span ng-if="match.error">
+                <span>{{match.message}}</span>
+          </span>
+    </div>
+
 
 
 <!-- Mainly scripts -->

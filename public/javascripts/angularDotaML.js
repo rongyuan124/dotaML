@@ -1,5 +1,5 @@
 angular
-    .module('DotaMLAPP',[])
+    .module('DotaMLAPP',['btford.socket-io'])
     .controller('Dashboard',Dashboard)
     .factory('DataService',['$http',function($http){
         var baseURL = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/';
@@ -10,8 +10,18 @@ angular
                 callback : 'JSON_CALLBACK'
             }
         };
+        var matches = {};
         //delete config.headers.X-Requested-With;
         return {
+            getAllMatches : function(){
+                return matches;
+            },
+            addMatch : function(match){
+                matches[match.matchId] = match;
+            },
+            updateMatchPrediction : function(matchId,prediction){
+                matches[matchId].prediction = prediction;
+            },
             getMatchInfo : function(matchId){
                 return $http.get('/match/' + matchId).then(
                     function(resp) {return resp;},
@@ -19,18 +29,30 @@ angular
                 );
             }
         }
+    }])
+    .factory('SocketService',['socketFactory','DataService',function(socketFactory, DataService){
+        var dashboardSocket = socketFactory();
+        dashboardSocket.on('match',function(data){
+            console.log(data);
+            DataService.updateMatchPrediction(data.matchId, data.prediction); //TODO: directly pass data objection into the function
+        })
+        return dashboardSocket;
     }]);
 
-Dashboard.$inject = ['DataService'];
-function Dashboard (DataService){
+
+// controller
+Dashboard.$inject = ['DataService','SocketService'];
+function Dashboard (DataService, SocketService){
 
     var self = this;
     self.matchId = 27110133;
-    self.matchInfo = {};
+    self.matches = DataService.getAllMatches();
 
-    self.getMatchInfo = function(matchId){
+
+    self.addMatchInfo = function(matchId){
         DataService.getMatchInfo(matchId).then(function(resp){
-            self.heroIdList = resp.data;
+            var match = resp.data;
+            DataService.addMatch(match);
         });
     };
 }
