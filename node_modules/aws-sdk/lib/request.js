@@ -16,26 +16,28 @@ var fsm = new AcceptorStateMachine();
 fsm.setupStates = function() {
   var transition = function(_, done) {
     var self = this;
+    self._haltHandlersOnError = false;
 
-    try {
-      self.emit(self._asm.currentState, function() {
-        done(self.response.error);
-      });
-    } catch (err) {
-      if (isTerminalState(self)) {
-        if (domain && self.domain instanceof domain.Domain) {
-          err.domainEmitter = self;
-          err.domain = self.domain;
-          err.domainThrown = false;
-          self.domain.emit('error', err);
+    self.emit(self._asm.currentState, function(err) {
+      if (err) {
+        if (isTerminalState(self)) {
+          if (domain && self.domain instanceof domain.Domain) {
+            err.domainEmitter = self;
+            err.domain = self.domain;
+            err.domainThrown = false;
+            self.domain.emit('error', err);
+          } else {
+            throw err;
+          }
         } else {
-          throw err;
+          self.response.error = err;
+          done(err);
         }
       } else {
-        self.response.error = err;
-        done(err);
+        done(self.response.error);
       }
-    }
+    });
+
   };
 
   this.addState('validate', 'build', 'error', transition);
@@ -315,6 +317,7 @@ AWS.Request = inherit({
 
     this.response = new AWS.Response(this);
     this._asm = new AcceptorStateMachine(fsm.states, 'validate');
+    this._haltHandlersOnError = false;
 
     AWS.SequentialExecutor.call(this);
     this.emit = this.emitEvent;
@@ -527,24 +530,22 @@ AWS.Request = inherit({
     var streams = AWS.util.nodeRequire('stream');
     var req = this;
     var stream = null;
-    var legacyStreams = false;
 
     if (AWS.HttpClient.streamsApiVersion === 2) {
-      stream = new streams.Readable();
-      stream._read = function() {};
+      stream = new streams.PassThrough();
+      req.send();
     } else {
       stream = new streams.Stream();
       stream.readable = true;
-    }
 
-    stream.sent = false;
-    stream.on('newListener', function(event) {
-      if (!stream.sent && (event === 'data' || event === 'readable')) {
-        if (event === 'data') legacyStreams = true;
-        stream.sent = true;
-        process.nextTick(function() { req.send(function() { }); });
-      }
-    });
+      stream.sent = false;
+      stream.on('newListener', function(event) {
+        if (!stream.sent && event === 'data') {
+          stream.sent = true;
+          process.nextTick(function() { req.send(); });
+        }
+      });
+    }
 
     this.on('httpHeaders', function streamHeaders(statusCode, headers, resp) {
       if (statusCode < 300) {
@@ -556,24 +557,14 @@ AWS.Request = inherit({
         });
 
         var httpStream = resp.httpResponse.createUnbufferedStream();
-        if (legacyStreams) {
+        if (AWS.HttpClient.streamsApiVersion === 2) {
+          httpStream.pipe(stream);
+        } else {
           httpStream.on('data', function(arg) {
             stream.emit('data', arg);
           });
           httpStream.on('end', function() {
             stream.emit('end');
-          });
-        } else {
-          httpStream.on('readable', function() {
-            var chunk;
-            do {
-              chunk = httpStream.read();
-              if (chunk !== null) stream.push(chunk);
-            } while (chunk !== null);
-            stream.read(0);
-          });
-          httpStream.on('end', function() {
-            stream.push(null);
           });
         }
 
@@ -670,6 +661,13 @@ AWS.Request = inherit({
     // don't need these headers on a GET request
     delete request.httpRequest.headers['Content-Length'];
     delete request.httpRequest.headers['Content-Type'];
+  },
+
+  /**
+   * @api private
+   */
+  haltHandlersOnError: function haltHandlersOnError() {
+    this._haltHandlersOnError = true;
   }
 });
 

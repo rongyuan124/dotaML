@@ -96,7 +96,7 @@ var createArray = function(heroIdList){
 };
 
 var dummyHeroIdList = [45,16,6,74,8,10,58,7,14,62];
-cp.execFile('/home/spin/dotaML/dummy.py',function(err,stdout,stderr){
+cp.execFile(path.join(__dirname,'dummy.py'),function(err,stdout,stderr){
     if(err) {return console.error(err)}
     console.log('Prediction is',stdout);
 });
@@ -120,7 +120,7 @@ app.get('/match/:matchId',function(req,res,next){
                 var inputArray = createArray(heroIdList);
 
                 // exec cp, should use queue
-                cp.execFile('/home/spin/dotaML/dummy.py', function (err, stdout, stderr) {
+                cp.execFile(path.join(__dirname, 'dummy.py'), function (err, stdout, stderr) {
                     if (err) {
                         return console.error(err)
                     }
