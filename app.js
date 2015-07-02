@@ -63,11 +63,58 @@ app.disable("x-powered-by"); // prevent profiling the webserver
 
 // Object responsible for interfacing with SP
 var SpManager = (function(){
-    var key = '7994766109F00F8528BF6668AA0120C1'
+    var key = '7994766109F00F8528BF6668AA0120C1';
+    var url = 'https://api.steampowered.com/IDOTA2Match_570/getliveleaguegames/V001/?key=7994766109F00F8528BF6668AA0120C1';
+    var queryInterval = 5*1000; // query the steam powered server every certain amount of time
+    function getValidMatches(result){
+        var validMatches = [];
+        result.games.forEach(function(game){
+            if (game.scoreboard && game.scoreboard.radiant && game.scoreboard.dire
+                && game.scoreboard.radiant.picks && game.scoreboard.radiant.bans
+                && game.scoreboard.dire.picks && game.scoreboard.dire.bans) {
+
+                if (game.scoreboard.dire.picks.length == 5 &&
+                    game.scoreboard.dire.bans.length == 5 &&
+                    game.scoreboard.radiant.picks.length == 5 &&
+                    game.scoreboard.radiant.bans.length == 5){
+
+                    validMatches.push( {
+                        match_id : game.match_id,
+                        radiant_team : game.radiant_team,
+                        dire_team : game.dire_team,
+                        radiant_picks : game.scoreboard.radiant.picks,
+                        dire_picks : game.scoreboard.dire.picks
+                    });
+                }
+            }
+        })
+        return validMatches;
+    };
+
     return {
-        getMatch: function (matchId,cb) {
+        getOneMatch: function (matchId,cb) {
             superagent.get('https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id='+ matchId+ '&key='+key)
                 .end(cb);
+        },
+        getCurrentMatches : function(){
+            superagent.get(url,cb)
+                .end(cb);
+        },
+
+        run : function(){
+            setInterval(function(){
+                this.getCurrentMatches(function(err,resp){
+                    if (err) {console.error(err); return;}
+                    var result = resp.body.result;
+                    if (result && result.error) {
+                        console.error(result.error); return;
+                    }
+                    var validMatches = getValidMatches(result);
+                    console.log(validMatches);
+                    // TODO: save to the db
+                    // TODO: update the clients
+                })
+            }, queryInterval)
         }
     }
 })();
@@ -110,11 +157,11 @@ app.get('/',function(req,res){
 app.get('/match/:matchId',function(req,res,next){
     console.log(req.params.matchId);
     var matchId = req.params.matchId;
-    SpManager.getMatch(matchId,function(err,resp){
+    SpManager.getOneMatch(matchId,function(err,resp){
         if (err) {next(err)}
         else {
             var match = resp.body;
-            console.log(match);
+            //console.log(match);
             if (match && match.result && match.result.players) {
                 var heroIdList = getHeroIdinMatch(resp.body);
                 var inputArray = createArray(heroIdList);
