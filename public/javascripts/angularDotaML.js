@@ -2,16 +2,18 @@ angular
     .module('DotaMLAPP',['btford.socket-io'])
     .controller('Dashboard',Dashboard)
     .factory('DataService',['$http',function($http){
-        var baseURL = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/';
-        var config = {
-            params: {
-                match_id : '27110133',
-                key : '7994766109F00F8528BF6668AA0120C1',
-                callback : 'JSON_CALLBACK'
-            }
-        };
+
         var matches = {};
-        //delete config.headers.X-Requested-With;
+        $http.get('/matches').then(
+            function(resp) {
+                resp.data.forEach(function(match){
+                    matches[match._id] = match;
+                });
+
+                console.log('here',matches);
+            },
+            function(err) {console.error(err)}
+        );
         return {
             getAllMatches : function(){
                 return matches;
@@ -19,8 +21,12 @@ angular
             addMatch : function(match){
                 matches[match.matchId] = match;
             },
-            updateMatchPrediction : function(matchId,prediction){
-                matches[matchId].prediction = prediction;
+
+            updateMatch : function(match){
+                matches[match._id] = match;
+            },
+            updateMatchPrediction : function(match_id,prediction){
+                matches[match_id].prediction = prediction;
             },
             getMatchInfo : function(matchId){
                 return $http.get('/match/' + matchId).then(
@@ -34,7 +40,11 @@ angular
         var dashboardSocket = socketFactory();
         dashboardSocket.on('match',function(data){
             console.log(data);
-            DataService.updateMatchPrediction(data.matchId, data.prediction); //TODO: directly pass data objection into the function
+            DataService.updateMatch(data); //TODO: directly pass data objection into the function
+        });
+        dashboardSocket.on('matchPrediction',function(data){
+            console.log(data);
+            DataService.updateMatchPrediction(data._id, data.prediction);
         })
         return dashboardSocket;
     }]);

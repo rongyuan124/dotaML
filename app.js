@@ -17,6 +17,7 @@ var fs             = require('fs');
 var moment         = require('moment');
 var superagent     = require('superagent');
 var cp             = require('child_process');
+var log            = require('loglevel');
 
 
 
@@ -32,9 +33,15 @@ if (env == 'production'){
     console.log = function(){};
 }
 
+// mongodb database
+var dbURL = (env =='production') ? config.mongodb.cloudMongo : config.mongodb.devMongo;
+var db = mongoose.connect(dbURL);
+
+// mongodb model
+var Match = require('./models/Match.js');
 
 // aws
-var AWS = require('aws-sdk');
+//var AWS = require('aws-sdk');
 
 // create app and server
 var app = express();
@@ -52,7 +59,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 
-app.use(favicon(__dirname + '/public/images/favicon.ico'));
 app.use(logger('[:date[iso]] :method :url :status :res[content-length] - :response-time ms'));
 app.use(bodyParser.json({limit: '1mb'}));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -65,29 +71,41 @@ app.disable("x-powered-by"); // prevent profiling the webserver
 var SpManager = (function(){
     var key = '7994766109F00F8528BF6668AA0120C1';
     var url = 'https://api.steampowered.com/IDOTA2Match_570/getliveleaguegames/V001/?key=7994766109F00F8528BF6668AA0120C1';
-    var queryInterval = 5*1000; // query the steam powered server every certain amount of time
+    var queryInterval = 10*1000; // query the steam powered server every certain amount of time
     function getValidMatches(result){
         var validMatches = [];
-        result.games.forEach(function(game){
-            if (game.scoreboard && game.scoreboard.radiant && game.scoreboard.dire
-                && game.scoreboard.radiant.picks && game.scoreboard.radiant.bans
-                && game.scoreboard.dire.picks && game.scoreboard.dire.bans) {
+        if (result.games) {
+            result.games.forEach(function (game) {
+                // there is no team information when the picks are ready
+                var match = {};
+                // todo: if duration > interval, the match should already have been properly saved
+                // get the pick information
+                if (game.scoreboard && game.scoreboard.radiant && game.scoreboard.dire
+                    && game.scoreboard.radiant.picks && game.scoreboard.radiant.bans
+                    && game.scoreboard.dire.picks && game.scoreboard.dire.bans) {
 
-                if (game.scoreboard.dire.picks.length == 5 &&
-                    game.scoreboard.dire.bans.length == 5 &&
-                    game.scoreboard.radiant.picks.length == 5 &&
-                    game.scoreboard.radiant.bans.length == 5){
+                    if (game.scoreboard.dire.picks.length == 5 &&
+                        game.scoreboard.dire.bans.length == 5 &&
+                        game.scoreboard.radiant.picks.length == 5 &&
+                        game.scoreboard.radiant.bans.length == 5) {
 
-                    validMatches.push( {
-                        match_id : game.match_id,
-                        radiant_team : game.radiant_team,
-                        dire_team : game.dire_team,
-                        radiant_picks : game.scoreboard.radiant.picks,
-                        dire_picks : game.scoreboard.dire.picks
-                    });
+                        match._id = game.match_id;
+                        match.radiant_picks = game.scoreboard.radiant.picks;
+                        match.dire_picks = game.scoreboard.dire.picks;
+                    }
                 }
-            }
-        })
+
+                // get the team information
+                if (game.radiant_team && game.dire_team) {
+                    match._id = game.match_id;
+                    match.radiant_team = game.radiant_team;
+                    match.dire_team = game.dire_team;
+                }
+
+                // add to the list
+                if (match._id) validMatches.push(match);
+            });
+        }
         return validMatches;
     };
 
@@ -96,28 +114,92 @@ var SpManager = (function(){
             superagent.get('https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id='+ matchId+ '&key='+key)
                 .end(cb);
         },
-        getCurrentMatches : function(){
-            superagent.get(url,cb)
+        getCurrentMatches : function(cb){
+            superagent.get(url)
                 .end(cb);
         },
 
+        getValidMatches : getValidMatches,
+
         run : function(){
+            var self = this;
             setInterval(function(){
-                this.getCurrentMatches(function(err,resp){
+
+                self.getCurrentMatches(function(err,resp){
                     if (err) {console.error(err); return;}
+                    console.log('------new query-------');
                     var result = resp.body.result;
-                    if (result && result.error) {
+                    if (!result || result.error) {
                         console.error(result.error); return;
                     }
                     var validMatches = getValidMatches(result);
-                    console.log(validMatches);
-                    // TODO: save to the db
-                    // TODO: update the clients
+                    console.log(validMatches.length);
+
+                    validMatches.forEach(function(match){
+
+                        Match.findById(match._id,function(err,m){
+                            if (err) {console.error(err); return;}
+                            // save to db
+
+                            if (m) { // if the match exists in db
+                                // update the match
+                                m.radiant_picks = match.radiant_picks;
+                                m.dire_picks = match.dire_picks;
+                                if (match.radiant_team) {m.radiant_team = match.radiant_team}
+                                if (match.dire_team) {m.dire_team = match.dire_team}
+                                // save the match
+                                m.save(function(err){
+                                    if(err){console.error(err);return;}
+                                    console.log('match udpated');
+
+                                })
+                            } else { // no prior match, save a new one
+                                Match.create(match,function(err,createdMatch){
+                                    if(err){console.error(err);return;}
+                                    console.log('match saved');
+                                })
+                            }
+
+                            // send to client
+
+                            if (match.radiant_picks) match.radiant_picks = match.radiant_picks.map(function(pick){ return pick.hero_id});
+                            if (match.dire_picks)    match.dire_picks = match.dire_picks.map(function(pick){return pick.hero_id});
+                            emitToClient('match',match);
+
+                            if (match.radiant_picks && match.dire_picks) {
+
+                                cp.execFile(path.join(__dirname, 'dummy.py'), function (err, stdout, stderr) {
+                                    if (err) {
+                                        console.error(err); return;
+                                    }
+                                    console.log('Prediction is', stdout);
+                                    var prediction = stdout;
+                                    emitToClient('matchPrediction', {
+                                        prediction:prediction,
+                                        _id : match._id
+                                    });
+                                });
+                            }
+
+
+
+
+                        });
+
+                    })
                 })
             }, queryInterval)
         }
     }
 })();
+
+// debug
+//var sampleObj = require('./sampleObj');
+//var validMatches = SpManager.getValidMatches(sampleObj.result);
+//console.log(validMatches.length);
+
+// Start the query service
+SpManager.run();
 
 var getHeroIdinMatch = function(matchObj){
     var heroIdList = matchObj.result.players.map(function(player){
@@ -153,6 +235,29 @@ cp.execFile(path.join(__dirname,'dummy.py'),function(err,stdout,stderr){
 app.get('/',function(req,res){
     fs.createReadStream(__dirname + '/public/views/dashboard.html').pipe(res);
 });
+
+// get all available matches
+app.get('/matches',function(req,res){
+    Match.find({},function(err,matches){
+        if (err) {console.error(err);return;}
+        if (matches) {
+            matches = matches.map(function (match) {
+
+                if (match.radiant_picks) match.radiant_picks = match.radiant_picks.map(function (pick) {
+                    return pick.hero_id
+                });
+                if (match.dire_picks)    match.dire_picks = match.dire_picks.map(function (pick) {
+                    return pick.hero_id
+                });
+                return match;
+            });
+
+            res.send(JSON.stringify(matches));
+        } else {
+            res.status(200).send({});
+        }
+    })
+})
 
 app.get('/match/:matchId',function(req,res,next){
     console.log(req.params.matchId);

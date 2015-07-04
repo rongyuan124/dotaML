@@ -1646,6 +1646,7 @@ var sampleObj = {
                     }
                 },
                 {
+
                     "players": [
                         {
                             "account_id": 271218160,
@@ -2327,6 +2328,8 @@ var sampleObj = {
 }
 
 
+console.log(sampleObj.result.status);
+module.exports = sampleObj;
 /*
 * every lobby is a game ongoing
 * but only league_id == 2733 matters

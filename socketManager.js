@@ -1,12 +1,9 @@
 var io;
 
-function emitToClient(matchId,prediction){
-    var data = {
-        matchId : matchId,
-        prediction: prediction
-    };
-    io.emit('match',data);
-}
+function emitToClient(msg, matchObj){
+
+    io.emit(msg,matchObj);
+};
 
 module.exports = function(server) {
     io = require('socket.io').listen(server);

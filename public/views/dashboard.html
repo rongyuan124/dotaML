@@ -40,13 +40,17 @@
     </div>
     <br>
     <div ng-repeat="match in ctrl.matches">
-        <label>Match Id</label>
-        <span>{{match.matchId}}</span>
+          <label>Match Id</label>
+          <span>{{match._id}}</span>
           <span ng-if="!match.error">
-                <label>Hero List</label>
-                <span>{{match.heroIdList}}</span>
-                <label>Match Prediction</label>
-                <span>{{match.prediction}}</span>
+                <!--<span>{{match.time}}</span-->
+                <span>{{match.radiant_team.team_name}} (Randiant)</span>
+                <span>{{match.radiant_picks}}</span>
+                VS.
+                <span>{{match.dire_team.team_name}} (dire)</span>
+                <span>{{match.dire_picks}}</span>
+                <span> ---> </span>
+                <span>{{match.prediction}} (prediction)</span>
           </span>
           <span ng-if="match.error">
                 <span>{{match.message}}</span>
